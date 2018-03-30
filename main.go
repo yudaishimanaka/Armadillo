@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"sort"
@@ -17,7 +18,7 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
-			Name: "init",
+			Name:  "init",
 			Usage: "armadillo init <- initialize Armadillo and setting master password.",
 			Action: func(c *cli.Context) error {
 				log.Printf("Initialize Armadillo.")
@@ -25,7 +26,7 @@ func main() {
 			},
 		},
 		{
-			Name: "login",
+			Name:  "login",
 			Usage: "armadillo login <- login with Armadillo.",
 			Action: func(c *cli.Context) error {
 				log.Printf("Armadillo login")
@@ -33,7 +34,7 @@ func main() {
 			},
 		},
 		{
-			Name: "logout",
+			Name:  "logout",
 			Usage: "armadillo logout <- logout with Armadillo.",
 			Action: func(c *cli.Context) error {
 				log.Printf("Armadillo logout")
@@ -41,7 +42,7 @@ func main() {
 			},
 		},
 		{
-			Name: "create",
+			Name:  "create",
 			Usage: "armadillo create [site_name] <- setting password for site.",
 			Action: func(c *cli.Context) error {
 				log.Printf("Setting passowrd for site.")
@@ -49,7 +50,7 @@ func main() {
 			},
 		},
 		{
-			Name: "update",
+			Name:  "update",
 			Usage: "armadillo update <- update password.",
 			Action: func(c *cli.Context) error {
 				log.Printf("Update password.")
@@ -57,7 +58,7 @@ func main() {
 			},
 		},
 		{
-			Name: "show",
+			Name:  "show",
 			Usage: "armadillo show <- show password.",
 			Action: func(c *cli.Context) error {
 				log.Printf("Show password.")
