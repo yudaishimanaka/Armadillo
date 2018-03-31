@@ -5,4 +5,4 @@
 # Armadillo
 [![Build Status](https://travis-ci.org/yudaishimanaka/Armadillo.svg?branch=master)](https://travis-ci.org/yudaishimanaka/Armadillo)
 
-Password management CLI tool
+Simple password management CLI tool
