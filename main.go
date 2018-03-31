@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
+	"os/user"
 	"sort"
 
 	"github.com/urfave/cli"
@@ -20,7 +21,17 @@ func main() {
 			Name:  "init",
 			Usage: "armadillo init <- initialize Armadillo and setting master password.",
 			Action: func(c *cli.Context) error {
-				log.Printf("Initialize Armadillo.")
+				usr, err := user.Current()
+				if err != nil {
+					fmt.Println(err)
+				}
+				os.Chdir(usr.HomeDir)
+				if _, err := os.Stat(".armadillo"); os.IsNotExist(err) {
+					os.Mkdir(".armadillo", 0777)
+					fmt.Printf("Successful initialization.\n")
+				} else {
+					fmt.Printf("Already initialized.\n")
+				}
 				return nil
 			},
 		},
@@ -28,7 +39,7 @@ func main() {
 			Name:  "create",
 			Usage: "armadillo create [site_name] <- setting password for site.",
 			Action: func(c *cli.Context) error {
-				log.Printf("Setting passowrd for site.")
+				fmt.Printf("Setting passowrd for site.")
 				return nil
 			},
 		},
@@ -36,7 +47,7 @@ func main() {
 			Name:  "update",
 			Usage: "armadillo update <- update password.",
 			Action: func(c *cli.Context) error {
-				log.Printf("Update password.")
+				fmt.Printf("Update password.")
 				return nil
 			},
 		},
@@ -44,7 +55,7 @@ func main() {
 			Name:  "show",
 			Usage: "armadillo show <- show password.",
 			Action: func(c *cli.Context) error {
-				log.Printf("Show password.")
+				fmt.Printf("Show password.")
 				return nil
 			},
 		},
@@ -54,6 +65,6 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 }
