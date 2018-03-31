@@ -17,6 +17,14 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
+			Name:  "init",
+			Usage: "armadillo init <- initialize Armadillo and setting master password.",
+			Action: func(c *cli.Context) error {
+				log.Printf("Initialize Armadillo.")
+				return nil
+			},
+		},
+		{
 			Name:  "login",
 			Usage: "armadillo login <- login with Armadillo.",
 			Action: func(c *cli.Context) error {
