@@ -7,6 +7,10 @@ go:
 notifications:
   email: false
 
+branches:
+  only:
+  - master
+
 before_script:
   - go get github.com/urfave/cli
 
