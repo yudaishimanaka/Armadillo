@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"bufio"
 	"sort"
 
 	"github.com/urfave/cli"
+	"golang.org/x/crypto/ssh/terminal"
+	"syscall"
 )
 
 func main() {
@@ -19,7 +22,7 @@ func main() {
 	app.Commands = []cli.Command{
 		{
 			Name:  "init",
-			Usage: "armadillo init <- initialize Armadillo and setting master password.",
+			Usage: "armadillo init <- Initialization processing, done only once.",
 			Action: func(c *cli.Context) error {
 				usr, err := user.Current()
 				if err != nil {
@@ -39,7 +42,24 @@ func main() {
 			Name:  "create",
 			Usage: "armadillo create [site_name] <- setting password for site.",
 			Action: func(c *cli.Context) error {
-				fmt.Printf("Setting passowrd for site.")
+				fmt.Printf("Enter site name.: ")
+				stdIn1 := bufio.NewScanner(os.Stdin)
+				stdIn1.Scan()
+				siteName := stdIn1.Text()
+
+				fmt.Printf("Enter UserID or Email.: ")
+				stdIn2 := bufio.NewScanner(os.Stdin)
+				stdIn2.Scan()
+				idOrEmail := stdIn2.Text()
+
+				fmt.Printf("Enter site password.: ")
+				sitePass, err := terminal.ReadPassword(int(syscall.Stdin))
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				fmt.Println("\n" + siteName, idOrEmail, string(sitePass))
+
 				return nil
 			},
 		},
