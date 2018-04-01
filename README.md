@@ -33,4 +33,4 @@ It enables you to manage passwords from the terminal, so you can manage password
 |`show`|View site information (URL, Email or User ID, Password)|
 
 ## License
-The MIT License (MIT) -see `LICENSE.md` for more details
+The MIT License (MIT) -see `LICENSE` for more details
