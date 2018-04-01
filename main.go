@@ -1,10 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/user"
-	"bufio"
 	"sort"
 
 	"github.com/urfave/cli"
@@ -58,7 +58,7 @@ func main() {
 					fmt.Println(err)
 				}
 
-				fmt.Println("\n" + siteName, idOrEmail, string(sitePass))
+				fmt.Println("\n"+siteName, idOrEmail, string(sitePass))
 
 				return nil
 			},
