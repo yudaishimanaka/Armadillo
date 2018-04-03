@@ -6,7 +6,7 @@
 [![Build Status](https://travis-ci.org/yudaishimanaka/Armadillo.svg?branch=master)](https://travis-ci.org/yudaishimanaka/Armadillo)
 
 Simple password management CLI tool  
-It enables you to manage passwords from the terminal, so you can manage passwords for each site.  
+It enables you to manage passwords from the terminal, so you can manage passwords for each service.  
 
 **It only supports password management to the last.**
 
@@ -28,7 +28,7 @@ It enables you to manage passwords from the terminal, so you can manage password
 |Command|Detail|
 |:--:|:--:|
 |`init`|Initialization|
-|`create`|Save information for the site|
+|`create`|Save information for the service|
 |`update`|Update password|
 |`show`|View site information (URL, Email or User ID, Password)|
 
