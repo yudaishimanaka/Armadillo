@@ -11,15 +11,15 @@ import (
 	"sort"
 	"syscall"
 
+	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
-	"github.com/manifoldco/promptui"
 )
 
 type SiteInfo struct {
-	SiteName  string	`json:"SiteName"`
-	UidOrEmail string	`json:"UidOrEmail"`
-	Password  string	`json:"Password"`
+	SiteName   string `json:"SiteName"`
+	UidOrEmail string `json:"UidOrEmail"`
+	Password   string `json:"Password"`
 }
 
 type SitesInfo []SiteInfo
