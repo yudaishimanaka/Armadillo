@@ -13,12 +13,13 @@ import (
 
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
+	"github.com/manifoldco/promptui"
 )
 
 type SiteInfo struct {
-	SiteName  string
-	UidOrPass string
-	Password  string
+	SiteName  string	`json:"SiteName"`
+	UidOrPass string	`json:"UidOrPass"`
+	Password  string	`json:"Password"`
 }
 
 func chHomeDir() {
@@ -139,7 +140,26 @@ func main() {
 			Name:  "update",
 			Usage: "armadillo update <- update password.",
 			Action: func(c *cli.Context) error {
-				fmt.Printf("Update password.")
+				chHomeDir()
+				prompt := promptui.Select{
+					Label: "Update the information. Please select a site.",
+					Items: []string{"Twitter", "Amazon Web Service", "LINE", "Other"},
+				}
+				_, result, err1 := prompt.Run()
+				if err1 != nil {
+					fmt.Println(err1)
+				}
+
+				prompt2 := promptui.Select{
+					Label: "Please select the information to update.",
+					Items: []string{"Site name", "UserID or Email", "Password"},
+				}
+				_, result2, err2 := prompt2.Run()
+				if err2 != nil {
+					fmt.Println(err2)
+				}
+
+				fmt.Printf("Choose site is %q\nChoose information is %q\n", result, result2)
 				return nil
 			},
 		},
