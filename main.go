@@ -18,7 +18,7 @@ import (
 
 type SiteInfo struct {
 	SiteName  string	`json:"SiteName"`
-	UidOrPass string	`json:"UidOrPass"`
+	UidOrEmail string	`json:"UidOrEmail"`
 	Password  string	`json:"Password"`
 }
 
@@ -46,12 +46,12 @@ func hCtrlC(ch chan os.Signal) {
 	os.Exit(0)
 }
 
-func encodingJson(siteinfo SiteInfo) []byte {
-	data, _ := json.Marshal(siteinfo)
+func encodingJson(siteInfo SiteInfo) []byte {
+	data, _ := json.Marshal(siteInfo)
 	return data
 }
 
-func getSiteName(dir string) []SiteInfo {
+func getSiteInfo(dir string) []SiteInfo {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		fmt.Println(err)
@@ -60,7 +60,6 @@ func getSiteName(dir string) []SiteInfo {
 	var siteInfo SiteInfo
 	var sitesInfo SitesInfo
 	for _, siteName := range files {
-		fmt.Println(siteName.Name())
 		os.Chdir(".armadillo")
 		file, err := ioutil.ReadFile(string(siteName.Name()))
 		if err != nil {
@@ -118,9 +117,9 @@ func main() {
 					fmt.Printf("Enter UserID or Email used for login: ")
 					stdIn2 := bufio.NewScanner(os.Stdin)
 					stdIn2.Scan()
-					siteInfo.UidOrPass = stdIn2.Text()
+					siteInfo.UidOrEmail = stdIn2.Text()
 
-					if len(siteInfo.UidOrPass) != 0 {
+					if len(siteInfo.UidOrEmail) != 0 {
 						break
 					} else {
 						fmt.Printf("Input is empty! Cancel with Ctrl + C\n")
@@ -163,23 +162,71 @@ func main() {
 			Name:  "update",
 			Usage: "armadillo update <- update password.",
 			Action: func(c *cli.Context) error {
+				siteInfo := SiteInfo{}
 				chHomeDir()
-				ch := make(chan os.Signal)
-				signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
-				go hCtrlC(ch)
 
-				fmt.Println(getSiteName(".armadillo"))
-
-				prompt := promptui.Select{
-					Label: "Update the information. Please select a site.",
-					Items: []string{"Twitter", "Amazon Web Service", "LINE", "Other"},
-				}
-				_, result, err := prompt.Run()
-				if err != nil {
-					fmt.Println(err)
+				var items []string
+				for _, siteInfo := range getSiteInfo(".armadillo") {
+					items = append(items, siteInfo.SiteName)
 				}
 
-				fmt.Printf("Choose site is %s\n", result)
+				if len(items) != 0 {
+					ch := make(chan os.Signal)
+					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+					go hCtrlC(ch)
+					prompt := promptui.Select{
+						Label: "Update the information. Please select a site.",
+						Items: items,
+					}
+					_, result, err := prompt.Run()
+					if err != nil {
+						fmt.Println(err)
+					}
+					siteInfo.SiteName = result
+
+					for {
+						fmt.Printf("Enter UserID or Email used for login: ")
+						stdIn2 := bufio.NewScanner(os.Stdin)
+						stdIn2.Scan()
+						siteInfo.UidOrEmail = stdIn2.Text()
+
+						if len(siteInfo.UidOrEmail) != 0 {
+							break
+						} else {
+							fmt.Printf("Input is empty! Cancel with Ctrl + C\n")
+						}
+					}
+
+					for {
+						fmt.Printf("Enter site password: ")
+						sitePass, _ := terminal.ReadPassword(int(syscall.Stdin))
+
+						fmt.Printf("\nRetype password: ")
+						retypePass, _ := terminal.ReadPassword(int(syscall.Stdin))
+
+						siteInfo.Password = string(sitePass)
+						retypePassStr := string(retypePass)
+
+						if len(siteInfo.Password) != 0 {
+							if retypePassStr == siteInfo.Password {
+								chHomeDir()
+								os.Chdir(".armadillo")
+								bdata := encodingJson(siteInfo)
+								content := []byte(bdata)
+								ioutil.WriteFile(siteInfo.SiteName+".json", content, os.ModePerm)
+								fmt.Printf("\nUpdate succeeded!!!\n")
+								break
+							} else {
+								fmt.Printf("\nPasswords do not match\n")
+							}
+						} else {
+							fmt.Printf("\nInput is empty! Cancel with Ctrl + C\n")
+						}
+					}
+				} else {
+					fmt.Printf("Information on the site is not registered.\n")
+				}
+
 				return nil
 			},
 		},
