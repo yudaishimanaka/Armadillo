@@ -22,6 +22,8 @@ type SiteInfo struct {
 	Password  string	`json:"Password"`
 }
 
+type SitesInfo []SiteInfo
+
 func chHomeDir() {
 	usr, err := user.Current()
 	if err != nil {
@@ -47,6 +49,27 @@ func hCtrlC(ch chan os.Signal) {
 func encodingJson(siteinfo SiteInfo) []byte {
 	data, _ := json.Marshal(siteinfo)
 	return data
+}
+
+func getSiteName(dir string) []SiteInfo {
+	files, err := ioutil.ReadDir(dir)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var siteInfo SiteInfo
+	var sitesInfo SitesInfo
+	for _, siteName := range files {
+		fmt.Println(siteName.Name())
+		os.Chdir(".armadillo")
+		file, err := ioutil.ReadFile(string(siteName.Name()))
+		if err != nil {
+			fmt.Println(err)
+		}
+		json.Unmarshal(file, &siteInfo)
+		sitesInfo = append(sitesInfo, siteInfo)
+	}
+	return sitesInfo
 }
 
 func main() {
@@ -141,25 +164,22 @@ func main() {
 			Usage: "armadillo update <- update password.",
 			Action: func(c *cli.Context) error {
 				chHomeDir()
+				ch := make(chan os.Signal)
+				signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+				go hCtrlC(ch)
+
+				fmt.Println(getSiteName(".armadillo"))
+
 				prompt := promptui.Select{
 					Label: "Update the information. Please select a site.",
 					Items: []string{"Twitter", "Amazon Web Service", "LINE", "Other"},
 				}
-				_, result, err1 := prompt.Run()
-				if err1 != nil {
-					fmt.Println(err1)
+				_, result, err := prompt.Run()
+				if err != nil {
+					fmt.Println(err)
 				}
 
-				prompt2 := promptui.Select{
-					Label: "Please select the information to update.",
-					Items: []string{"Site name", "UserID or Email", "Password"},
-				}
-				_, result2, err2 := prompt2.Run()
-				if err2 != nil {
-					fmt.Println(err2)
-				}
-
-				fmt.Printf("Choose site is %q\nChoose information is %q\n", result, result2)
+				fmt.Printf("Choose site is %s\n", result)
 				return nil
 			},
 		},
