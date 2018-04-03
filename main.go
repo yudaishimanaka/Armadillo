@@ -96,12 +96,12 @@ func main() {
 		},
 		{
 			Name:  "create",
-			Usage: "armadillo create [site_name] <- setting password for site.",
+			Usage: "armadillo create [site_name] <- setting password for service.",
 			Action: func(c *cli.Context) error {
 				siteInfo := SiteInfo{}
 
 				for {
-					fmt.Printf("Enter site name: ")
+					fmt.Printf("Enter service name: ")
 					stdIn1 := bufio.NewScanner(os.Stdin)
 					stdIn1.Scan()
 					siteInfo.SiteName = stdIn1.Text()
@@ -130,7 +130,7 @@ func main() {
 				signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 				go hCtrlC(ch)
 				for {
-					fmt.Printf("Enter site password: ")
+					fmt.Printf("Enter service password: ")
 					sitePass, _ := terminal.ReadPassword(int(syscall.Stdin))
 
 					fmt.Printf("\nRetype password: ")
@@ -175,7 +175,7 @@ func main() {
 					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 					go hCtrlC(ch)
 					prompt := promptui.Select{
-						Label: "Update the information. Please select a site.",
+						Label: "Update the information. Please select a service.",
 						Items: items,
 					}
 					_, result, err := prompt.Run()
@@ -198,7 +198,7 @@ func main() {
 					}
 
 					for {
-						fmt.Printf("Enter site password: ")
+						fmt.Printf("Enter service password: ")
 						sitePass, _ := terminal.ReadPassword(int(syscall.Stdin))
 
 						fmt.Printf("\nRetype password: ")
@@ -224,7 +224,7 @@ func main() {
 						}
 					}
 				} else {
-					fmt.Printf("Information on the site is not registered.\n")
+					fmt.Printf("Information on the service is not registered.\n")
 				}
 
 				return nil
@@ -232,7 +232,7 @@ func main() {
 		},
 		{
 			Name:  "delete",
-			Usage: "armadillo delete <- Delete site information.",
+			Usage: "armadillo delete <- Delete service information.",
 			Action: func(c *cli.Context) error {
 				fmt.Printf("Update password.")
 				return nil
