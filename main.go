@@ -144,6 +144,14 @@ func main() {
 			},
 		},
 		{
+			Name:  "delete",
+			Usage: "armadillo delete <- Delete site information.",
+			Action: func(c *cli.Context) error {
+				fmt.Printf("Update password.")
+				return nil
+			},
+		},
+		{
 			Name:  "show",
 			Usage: "armadillo show <- show password.",
 			Action: func(c *cli.Context) error {
