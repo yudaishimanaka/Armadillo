@@ -281,7 +281,7 @@ func main() {
 					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 					go hCtrlC(ch)
 					prompt := promptui.Select{
-						Label: "Delete the information. Please select a service.",
+						Label: "Show the information. Please select a service.",
 						Items: items,
 					}
 					_, result, err := prompt.Run()
