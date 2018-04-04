@@ -30,7 +30,7 @@ It enables you to manage passwords from the terminal, so you can manage password
 |`init`|Initialization|
 |`create`|Save information for the service|
 |`update`|Update password|
-|`show`|View site information (URL, Email or User ID, Password)|
+|`show`|View service information (URL, Email or User ID, Password)|
 
 ## License
 The MIT License (MIT) -see `LICENSE` for more details
