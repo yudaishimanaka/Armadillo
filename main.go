@@ -17,9 +17,9 @@ import (
 )
 
 type serviceInfo struct {
-	serviceName   string `json:"serviceName"`
-	UidOrEmail string `json:"UidOrEmail"`
-	Password   string `json:"Password"`
+	ServiceName string `json:"ServiceName"`
+	UidOrEmail  string `json:"UidOrEmail"`
+	Password    string `json:"Password"`
 }
 
 type servicesInfo []serviceInfo
@@ -51,7 +51,7 @@ func encodingJson(serviceInfo serviceInfo) []byte {
 	return data
 }
 
-func getserviceInfo(dir string) []serviceInfo {
+func getServiceInfo(dir string) []serviceInfo {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		fmt.Println(err)
@@ -104,9 +104,9 @@ func main() {
 					fmt.Printf("Enter service name: ")
 					stdIn1 := bufio.NewScanner(os.Stdin)
 					stdIn1.Scan()
-					serviceInfo.serviceName = stdIn1.Text()
+					serviceInfo.ServiceName = stdIn1.Text()
 
-					if len(serviceInfo.serviceName) != 0 {
+					if len(serviceInfo.ServiceName) != 0 {
 						break
 					} else {
 						fmt.Printf("Input is empty! Cancel with Ctrl + C\n")
@@ -145,7 +145,7 @@ func main() {
 							os.Chdir(".armadillo")
 							bdata := encodingJson(serviceInfo)
 							content := []byte(bdata)
-							ioutil.WriteFile(serviceInfo.serviceName+".json", content, os.ModePerm)
+							ioutil.WriteFile(serviceInfo.ServiceName+".json", content, os.ModePerm)
 							fmt.Printf("\nCreate succeeded!!!\n")
 							break
 						} else {
@@ -166,8 +166,8 @@ func main() {
 				chHomeDir()
 
 				var items []string
-				for _, serviceInfo := range getserviceInfo(".armadillo") {
-					items = append(items, serviceInfo.serviceName)
+				for _, serviceInfo := range getServiceInfo(".armadillo") {
+					items = append(items, serviceInfo.ServiceName)
 				}
 
 				if len(items) != 0 {
@@ -182,7 +182,7 @@ func main() {
 					if err != nil {
 						fmt.Println(err)
 					}
-					serviceInfo.serviceName = result
+					serviceInfo.ServiceName = result
 
 					for {
 						fmt.Printf("Enter UserID or Email used for login: ")
@@ -213,7 +213,7 @@ func main() {
 								os.Chdir(".armadillo")
 								bdata := encodingJson(serviceInfo)
 								content := []byte(bdata)
-								ioutil.WriteFile(serviceInfo.serviceName+".json", content, os.ModePerm)
+								ioutil.WriteFile(serviceInfo.ServiceName+".json", content, os.ModePerm)
 								fmt.Printf("\nUpdate succeeded!!!\n")
 								break
 							} else {
@@ -237,8 +237,8 @@ func main() {
 				chHomeDir()
 
 				var items []string
-				for _, serviceInfo := range getserviceInfo(".armadillo") {
-					items = append(items, serviceInfo.serviceName)
+				for _, serviceInfo := range getServiceInfo(".armadillo") {
+					items = append(items, serviceInfo.ServiceName)
 				}
 
 				if len(items) != 0 {
