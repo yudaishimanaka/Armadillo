@@ -11,18 +11,18 @@ import (
 	"sort"
 	"syscall"
 
+	"github.com/manifoldco/promptui"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh/terminal"
-	"github.com/manifoldco/promptui"
 )
 
-type SiteInfo struct {
-	SiteName  string	`json:"SiteName"`
-	UidOrEmail string	`json:"UidOrEmail"`
-	Password  string	`json:"Password"`
+type ServiceInfo struct {
+	ServiceName string `json:"ServiceName"`
+	UidOrEmail  string `json:"UidOrEmail"`
+	Password    string `json:"Password"`
 }
 
-type SitesInfo []SiteInfo
+type ServicesInfo []ServiceInfo
 
 func chHomeDir() {
 	usr, err := user.Current()
@@ -46,29 +46,29 @@ func hCtrlC(ch chan os.Signal) {
 	os.Exit(0)
 }
 
-func encodingJson(siteInfo SiteInfo) []byte {
-	data, _ := json.Marshal(siteInfo)
+func encodingJson(serviceInfo ServiceInfo) []byte {
+	data, _ := json.Marshal(serviceInfo)
 	return data
 }
 
-func getSiteInfo(dir string) []SiteInfo {
+func getServiceInfo(dir string) []ServiceInfo {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	var siteInfo SiteInfo
-	var sitesInfo SitesInfo
-	for _, siteName := range files {
+	var serviceInfo ServiceInfo
+	var servicesInfo ServicesInfo
+	for _, serviceName := range files {
 		os.Chdir(".armadillo")
-		file, err := ioutil.ReadFile(string(siteName.Name()))
+		file, err := ioutil.ReadFile(string(serviceName.Name()))
 		if err != nil {
 			fmt.Println(err)
 		}
-		json.Unmarshal(file, &siteInfo)
-		sitesInfo = append(sitesInfo, siteInfo)
+		json.Unmarshal(file, &serviceInfo)
+		servicesInfo = append(servicesInfo, serviceInfo)
 	}
-	return sitesInfo
+	return servicesInfo
 }
 
 func main() {
@@ -96,17 +96,17 @@ func main() {
 		},
 		{
 			Name:  "create",
-			Usage: "armadillo create [site_name] <- setting password for site.",
+			Usage: "armadillo create [service_name] <- setting password for service.",
 			Action: func(c *cli.Context) error {
-				siteInfo := SiteInfo{}
+				serviceInfo := ServiceInfo{}
 
 				for {
-					fmt.Printf("Enter site name: ")
+					fmt.Printf("Enter service name: ")
 					stdIn1 := bufio.NewScanner(os.Stdin)
 					stdIn1.Scan()
-					siteInfo.SiteName = stdIn1.Text()
+					serviceInfo.ServiceName = stdIn1.Text()
 
-					if len(siteInfo.SiteName) != 0 {
+					if len(serviceInfo.ServiceName) != 0 {
 						break
 					} else {
 						fmt.Printf("Input is empty! Cancel with Ctrl + C\n")
@@ -117,9 +117,9 @@ func main() {
 					fmt.Printf("Enter UserID or Email used for login: ")
 					stdIn2 := bufio.NewScanner(os.Stdin)
 					stdIn2.Scan()
-					siteInfo.UidOrEmail = stdIn2.Text()
+					serviceInfo.UidOrEmail = stdIn2.Text()
 
-					if len(siteInfo.UidOrEmail) != 0 {
+					if len(serviceInfo.UidOrEmail) != 0 {
 						break
 					} else {
 						fmt.Printf("Input is empty! Cancel with Ctrl + C\n")
@@ -130,22 +130,22 @@ func main() {
 				signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 				go hCtrlC(ch)
 				for {
-					fmt.Printf("Enter site password: ")
-					sitePass, _ := terminal.ReadPassword(int(syscall.Stdin))
+					fmt.Printf("Enter service password: ")
+					servicePass, _ := terminal.ReadPassword(int(syscall.Stdin))
 
 					fmt.Printf("\nRetype password: ")
 					retypePass, _ := terminal.ReadPassword(int(syscall.Stdin))
 
-					siteInfo.Password = string(sitePass)
+					serviceInfo.Password = string(servicePass)
 					retypePassStr := string(retypePass)
 
-					if len(siteInfo.Password) != 0 {
-						if retypePassStr == siteInfo.Password {
+					if len(serviceInfo.Password) != 0 {
+						if retypePassStr == serviceInfo.Password {
 							chHomeDir()
 							os.Chdir(".armadillo")
-							bdata := encodingJson(siteInfo)
+							bdata := encodingJson(serviceInfo)
 							content := []byte(bdata)
-							ioutil.WriteFile(siteInfo.SiteName+".json", content, os.ModePerm)
+							ioutil.WriteFile(serviceInfo.ServiceName+".json", content, os.ModePerm)
 							fmt.Printf("\nCreate succeeded!!!\n")
 							break
 						} else {
@@ -162,12 +162,12 @@ func main() {
 			Name:  "update",
 			Usage: "armadillo update <- update password.",
 			Action: func(c *cli.Context) error {
-				siteInfo := SiteInfo{}
+				serviceInfo := ServiceInfo{}
 				chHomeDir()
 
 				var items []string
-				for _, siteInfo := range getSiteInfo(".armadillo") {
-					items = append(items, siteInfo.SiteName)
+				for _, serviceInfo := range getServiceInfo(".armadillo") {
+					items = append(items, serviceInfo.ServiceName)
 				}
 
 				if len(items) != 0 {
@@ -175,22 +175,22 @@ func main() {
 					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 					go hCtrlC(ch)
 					prompt := promptui.Select{
-						Label: "Update the information. Please select a site.",
+						Label: "Update the information. Please select a service.",
 						Items: items,
 					}
 					_, result, err := prompt.Run()
 					if err != nil {
 						fmt.Println(err)
 					}
-					siteInfo.SiteName = result
+					serviceInfo.ServiceName = result
 
 					for {
 						fmt.Printf("Enter UserID or Email used for login: ")
 						stdIn2 := bufio.NewScanner(os.Stdin)
 						stdIn2.Scan()
-						siteInfo.UidOrEmail = stdIn2.Text()
+						serviceInfo.UidOrEmail = stdIn2.Text()
 
-						if len(siteInfo.UidOrEmail) != 0 {
+						if len(serviceInfo.UidOrEmail) != 0 {
 							break
 						} else {
 							fmt.Printf("Input is empty! Cancel with Ctrl + C\n")
@@ -198,22 +198,22 @@ func main() {
 					}
 
 					for {
-						fmt.Printf("Enter site password: ")
-						sitePass, _ := terminal.ReadPassword(int(syscall.Stdin))
+						fmt.Printf("Enter service password: ")
+						servicePass, _ := terminal.ReadPassword(int(syscall.Stdin))
 
 						fmt.Printf("\nRetype password: ")
 						retypePass, _ := terminal.ReadPassword(int(syscall.Stdin))
 
-						siteInfo.Password = string(sitePass)
+						serviceInfo.Password = string(servicePass)
 						retypePassStr := string(retypePass)
 
-						if len(siteInfo.Password) != 0 {
-							if retypePassStr == siteInfo.Password {
+						if len(serviceInfo.Password) != 0 {
+							if retypePassStr == serviceInfo.Password {
 								chHomeDir()
 								os.Chdir(".armadillo")
-								bdata := encodingJson(siteInfo)
+								bdata := encodingJson(serviceInfo)
 								content := []byte(bdata)
-								ioutil.WriteFile(siteInfo.SiteName+".json", content, os.ModePerm)
+								ioutil.WriteFile(serviceInfo.ServiceName+".json", content, os.ModePerm)
 								fmt.Printf("\nUpdate succeeded!!!\n")
 								break
 							} else {
@@ -224,17 +224,43 @@ func main() {
 						}
 					}
 				} else {
-					fmt.Printf("Information on the site is not registered.\n")
+					fmt.Printf("Information on the service is not registered.\n")
 				}
-
 				return nil
 			},
 		},
 		{
 			Name:  "delete",
-			Usage: "armadillo delete <- Delete site information.",
+			Usage: "armadillo delete <- Delete service information.",
 			Action: func(c *cli.Context) error {
-				fmt.Printf("Update password.")
+				chHomeDir()
+
+				var items []string
+				for _, serviceInfo := range getServiceInfo(".armadillo") {
+					items = append(items, serviceInfo.ServiceName)
+				}
+
+				if len(items) != 0 {
+					ch := make(chan os.Signal)
+					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+					go hCtrlC(ch)
+					prompt := promptui.Select{
+						Label: "Delete the information. Please select a service.",
+						Items: items,
+					}
+					_, result, err := prompt.Run()
+					if err != nil {
+						fmt.Println(err)
+					}
+
+					fileName := result + ".json"
+
+					os.Remove(fileName)
+					fmt.Printf("Information on the service has been deleted.\n")
+
+				} else {
+					fmt.Printf("Information on the service is not registered.\n")
+				}
 				return nil
 			},
 		},
@@ -242,7 +268,41 @@ func main() {
 			Name:  "show",
 			Usage: "armadillo show <- show password.",
 			Action: func(c *cli.Context) error {
-				fmt.Printf("Show password.")
+				serviceInfo := ServiceInfo{}
+				chHomeDir()
+
+				var items []string
+				for _, serviceInfo := range getServiceInfo(".armadillo") {
+					items = append(items, serviceInfo.ServiceName)
+				}
+
+				if len(items) != 0 {
+					ch := make(chan os.Signal)
+					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+					go hCtrlC(ch)
+					prompt := promptui.Select{
+						Label: "Delete the information. Please select a service.",
+						Items: items,
+					}
+					_, result, err := prompt.Run()
+					if err != nil {
+						fmt.Println(err)
+					}
+
+					fileName := result + ".json"
+
+					file, err := ioutil.ReadFile(fileName)
+					if err != nil {
+						fmt.Println(err)
+					}
+
+					json.Unmarshal(file, &serviceInfo)
+
+					fmt.Printf("Service name -> %s\nUserID or Email -> %s\nPassword -> %s\n", serviceInfo.ServiceName, serviceInfo.UidOrEmail, serviceInfo.Password)
+
+				} else {
+					fmt.Printf("Information on the service is not registered.\n")
+				}
 				return nil
 			},
 		},
