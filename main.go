@@ -16,13 +16,13 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-type serviceInfo struct {
+type ServiceInfo struct {
 	ServiceName string `json:"ServiceName"`
 	UidOrEmail  string `json:"UidOrEmail"`
 	Password    string `json:"Password"`
 }
 
-type servicesInfo []serviceInfo
+type ServicesInfo []ServiceInfo
 
 func chHomeDir() {
 	usr, err := user.Current()
@@ -46,19 +46,19 @@ func hCtrlC(ch chan os.Signal) {
 	os.Exit(0)
 }
 
-func encodingJson(serviceInfo serviceInfo) []byte {
+func encodingJson(serviceInfo ServiceInfo) []byte {
 	data, _ := json.Marshal(serviceInfo)
 	return data
 }
 
-func getServiceInfo(dir string) []serviceInfo {
+func getServiceInfo(dir string) []ServiceInfo {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	var serviceInfo serviceInfo
-	var servicesInfo servicesInfo
+	var serviceInfo ServiceInfo
+	var servicesInfo ServicesInfo
 	for _, serviceName := range files {
 		os.Chdir(".armadillo")
 		file, err := ioutil.ReadFile(string(serviceName.Name()))
@@ -98,7 +98,7 @@ func main() {
 			Name:  "create",
 			Usage: "armadillo create [service_name] <- setting password for service.",
 			Action: func(c *cli.Context) error {
-				serviceInfo := serviceInfo{}
+				serviceInfo := ServiceInfo{}
 
 				for {
 					fmt.Printf("Enter service name: ")
@@ -162,7 +162,7 @@ func main() {
 			Name:  "update",
 			Usage: "armadillo update <- update password.",
 			Action: func(c *cli.Context) error {
-				serviceInfo := serviceInfo{}
+				serviceInfo := ServiceInfo{}
 				chHomeDir()
 
 				var items []string
@@ -253,7 +253,9 @@ func main() {
 						fmt.Println(err)
 					}
 
-					os.Remove(result+".json")
+					fileName := result + ".json"
+
+					os.Remove(fileName)
 					fmt.Printf("Information on the service has been deleted.\n")
 
 				} else {
@@ -266,7 +268,41 @@ func main() {
 			Name:  "show",
 			Usage: "armadillo show <- show password.",
 			Action: func(c *cli.Context) error {
-				fmt.Printf("Show password.")
+				serviceInfo := ServiceInfo{}
+				chHomeDir()
+
+				var items []string
+				for _, serviceInfo := range getServiceInfo(".armadillo") {
+					items = append(items, serviceInfo.ServiceName)
+				}
+
+				if len(items) != 0 {
+					ch := make(chan os.Signal)
+					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
+					go hCtrlC(ch)
+					prompt := promptui.Select{
+						Label: "Delete the information. Please select a service.",
+						Items: items,
+					}
+					_, result, err := prompt.Run()
+					if err != nil {
+						fmt.Println(err)
+					}
+
+					fileName := result + ".json"
+
+					file, err := ioutil.ReadFile(fileName)
+					if err != nil {
+						fmt.Println(err)
+					}
+
+					json.Unmarshal(file, &serviceInfo)
+
+					fmt.Printf("Service name -> %s\nUserID or Email -> %s\nPassword -> %s\n", serviceInfo.ServiceName, serviceInfo.UidOrEmail, serviceInfo.Password)
+
+				} else {
+					fmt.Printf("Information on the service is not registered.\n")
+				}
 				return nil
 			},
 		},
