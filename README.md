@@ -29,8 +29,9 @@ It enables you to manage passwords from the terminal, so you can manage password
 |:--:|:--:|
 |`init`|Initialization|
 |`create`|Save information for the service|
-|`update`|Update password|
-|`show`|View service information (URL, Email or User ID, Password)|
+|`delete`|Delete information for the service|
+|`update`|Update information for the service|
+|`show`|View service information (Service Name, Email or User ID, Password)|
 
 ## License
 The MIT License (MIT) -see `LICENSE` for more details
