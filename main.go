@@ -226,7 +226,6 @@ func main() {
 				} else {
 					fmt.Printf("Information on the service is not registered.\n")
 				}
-
 				return nil
 			},
 		},
@@ -254,7 +253,8 @@ func main() {
 						fmt.Println(err)
 					}
 
-					fmt.Println(result)
+					os.Remove(result+".json")
+					fmt.Printf("Information on the service has been deleted.\n")
 
 				} else {
 					fmt.Printf("Information on the service is not registered.\n")
