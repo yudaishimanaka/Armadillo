@@ -24,15 +24,17 @@ type ServiceInfo struct {
 
 type ServicesInfo []ServiceInfo
 
-func chHomeDir() {
+func chHomeDir() error {
 	usr, err := user.Current()
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
 	os.Chdir(usr.HomeDir)
+
+	return nil
 }
 
-func hCtrlC(ch chan os.Signal) {
+func hCtrlC(ch chan os.Signal) error {
 	<-ch
 	attrs := syscall.ProcAttr{
 		Dir:   "",
@@ -41,34 +43,39 @@ func hCtrlC(ch chan os.Signal) {
 		Sys:   nil,
 	}
 	var ws syscall.WaitStatus
-	pid, _ := syscall.ForkExec("/bin/stty", []string{"stty", "echo"}, &attrs)
+	pid, err := syscall.ForkExec("/bin/stty", []string{"stty", "echo"}, &attrs)
+	if err != nil {
+		return err
+	}
 	syscall.Wait4(pid, &ws, 0, nil)
 	os.Exit(0)
+
+	return nil
 }
 
-func encodingJson(serviceInfo ServiceInfo) []byte {
-	data, _ := json.Marshal(serviceInfo)
-	return data
+func encodingJson(serviceInfo ServiceInfo) (data []byte, err error) {
+	data, err = json.Marshal(serviceInfo)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
-func getServiceInfo(dir string) []ServiceInfo {
+func getServicesInfo(dir string) (servicesInfo []ServiceInfo, err error) {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
-	var serviceInfo ServiceInfo
-	var servicesInfo ServicesInfo
 	for _, serviceName := range files {
+		var serviceInfo ServiceInfo
+		var servicesInfo ServicesInfo
 		os.Chdir(".armadillo")
-		file, err := ioutil.ReadFile(string(serviceName.Name()))
-		if err != nil {
-			fmt.Println(err)
-		}
+		file, _ := ioutil.ReadFile(string(serviceName.Name()))
 		json.Unmarshal(file, &serviceInfo)
 		servicesInfo = append(servicesInfo, serviceInfo)
 	}
-	return servicesInfo
+	return servicesInfo, nil
 }
 
 func main() {
@@ -143,7 +150,10 @@ func main() {
 						if retypePassStr == serviceInfo.Password {
 							chHomeDir()
 							os.Chdir(".armadillo")
-							bdata := encodingJson(serviceInfo)
+							bdata, err := encodingJson(serviceInfo)
+							if err != nil {
+								fmt.Println(err)
+							}
 							content := []byte(bdata)
 							ioutil.WriteFile(serviceInfo.ServiceName+".json", content, os.ModePerm)
 							fmt.Printf("\nCreate succeeded!!!\n")
@@ -166,7 +176,11 @@ func main() {
 				chHomeDir()
 
 				var items []string
-				for _, serviceInfo := range getServiceInfo(".armadillo") {
+				servicesInfo, err := getServicesInfo(".armadillo")
+				if err != nil {
+					fmt.Println(err)
+				}
+				for _, serviceInfo := range servicesInfo {
 					items = append(items, serviceInfo.ServiceName)
 				}
 
@@ -211,7 +225,10 @@ func main() {
 							if retypePassStr == serviceInfo.Password {
 								chHomeDir()
 								os.Chdir(".armadillo")
-								bdata := encodingJson(serviceInfo)
+								bdata, err := encodingJson(serviceInfo)
+								if err != nil {
+									fmt.Println(err)
+								}
 								content := []byte(bdata)
 								ioutil.WriteFile(serviceInfo.ServiceName+".json", content, os.ModePerm)
 								fmt.Printf("\nUpdate succeeded!!!\n")
@@ -236,7 +253,11 @@ func main() {
 				chHomeDir()
 
 				var items []string
-				for _, serviceInfo := range getServiceInfo(".armadillo") {
+				servicesInfo, err := getServicesInfo(".armadillo")
+				if err != nil {
+					fmt.Println(err)
+				}
+				for _, serviceInfo := range servicesInfo {
 					items = append(items, serviceInfo.ServiceName)
 				}
 
@@ -272,7 +293,11 @@ func main() {
 				chHomeDir()
 
 				var items []string
-				for _, serviceInfo := range getServiceInfo(".armadillo") {
+				servicesInfo, err := getServicesInfo(".armadillo")
+				if err != nil {
+					fmt.Println(err)
+				}
+				for _, serviceInfo := range servicesInfo {
 					items = append(items, serviceInfo.ServiceName)
 				}
 
