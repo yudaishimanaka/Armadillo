@@ -22,6 +22,11 @@ type ServiceInfo struct {
 	Password    string `json:"Password"`
 }
 
+const (
+	exitCodeOK = iota
+	exitCodeErr
+)
+
 type ServicesInfo []ServiceInfo
 
 func chHomeDir() error {
@@ -53,7 +58,7 @@ func hCtrlC(ch chan os.Signal) error {
 	if err2 != nil {
 		return err2
 	}
-	os.Exit(0)
+	os.Exit(exitCodeOK)
 	return nil
 }
 
