@@ -71,7 +71,10 @@ func getServicesInfo(dir string) (servicesInfo []ServiceInfo, err error) {
 		var serviceInfo ServiceInfo
 		var servicesInfo ServicesInfo
 		os.Chdir(".armadillo")
-		file, _ := ioutil.ReadFile(string(serviceName.Name()))
+		file, err := ioutil.ReadFile(string(serviceName.Name()))
+		if err != nil {
+			return nil, err
+		}
 		json.Unmarshal(file, &serviceInfo)
 		servicesInfo = append(servicesInfo, serviceInfo)
 	}
