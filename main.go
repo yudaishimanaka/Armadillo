@@ -29,7 +29,10 @@ func chHomeDir() error {
 	if err != nil {
 		return err
 	}
-	os.Chdir(usr.HomeDir)
+	err2 := os.Chdir(usr.HomeDir)
+	if err2 != nil {
+		return err2
+	}
 
 	return nil
 }
@@ -47,7 +50,10 @@ func hCtrlC(ch chan os.Signal) error {
 	if err != nil {
 		return err
 	}
-	syscall.Wait4(pid, &ws, 0, nil)
+	_, err2 := syscall.Wait4(pid, &ws, 0, nil)
+	if err2 != nil {
+		return err2
+	}
 	os.Exit(0)
 
 	return nil
@@ -75,7 +81,10 @@ func getServicesInfo(dir string) (servicesInfo []ServiceInfo, err error) {
 		if err != nil {
 			return nil, err
 		}
-		json.Unmarshal(file, &serviceInfo)
+		err2 := json.Unmarshal(file, &serviceInfo)
+		if err2 != nil {
+			return nil, err2
+		}
 		servicesInfo = append(servicesInfo, serviceInfo)
 	}
 	return servicesInfo, nil
