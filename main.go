@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/signal"
 	"os/user"
 	"sort"
 	"syscall"
@@ -38,27 +37,6 @@ func chHomeDir() error {
 	if err2 != nil {
 		return err2
 	}
-	return nil
-}
-
-func hCtrlC(ch chan os.Signal) error {
-	<-ch
-	attrs := syscall.ProcAttr{
-		Dir:   "",
-		Env:   []string{},
-		Files: []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd()},
-		Sys:   nil,
-	}
-	var ws syscall.WaitStatus
-	pid, err := syscall.ForkExec("/bin/stty", []string{"stty", "echo"}, &attrs)
-	if err != nil {
-		return err
-	}
-	_, err2 := syscall.Wait4(pid, &ws, 0, nil)
-	if err2 != nil {
-		return err2
-	}
-	os.Exit(exitCodeOK)
 	return nil
 }
 
@@ -153,9 +131,6 @@ func main() {
 					}
 				}
 
-				ch := make(chan os.Signal)
-				signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
-				go hCtrlC(ch)
 				for {
 					fmt.Printf("Enter service password: ")
 					servicePass, err := terminal.ReadPassword(int(syscall.Stdin))
@@ -217,9 +192,6 @@ func main() {
 				}
 
 				if len(items) != 0 {
-					ch := make(chan os.Signal)
-					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
-					go hCtrlC(ch)
 					prompt := promptui.Select{
 						Label: "Update the information. Please select a service.",
 						Items: items,
@@ -306,9 +278,6 @@ func main() {
 				}
 
 				if len(items) != 0 {
-					ch := make(chan os.Signal)
-					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
-					go hCtrlC(ch)
 					prompt := promptui.Select{
 						Label: "Delete the information. Please select a service.",
 						Items: items,
@@ -349,9 +318,6 @@ func main() {
 				}
 
 				if len(items) != 0 {
-					ch := make(chan os.Signal)
-					signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
-					go hCtrlC(ch)
 					prompt := promptui.Select{
 						Label: "Show the information. Please select a service.",
 						Items: items,
